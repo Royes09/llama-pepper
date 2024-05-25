@@ -9,7 +9,7 @@ def query(payload):
     return response.json()
 
 output = query({
-    "inputs": "Ce sunt drogurile?",
+    "inputs": "What is West University of Timisoara?",
 })
 
 # Step 3: Convert the dictionary to a JSON string
