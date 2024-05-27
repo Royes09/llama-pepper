@@ -1,50 +1,21 @@
-import openai
 import socket
-import sounddevice
-from scipy.io.wavfile import write
+import naoqi
+from naoqi import ALProxy
+import os
 
-fs= 44100
-print("Recording.....n")
-record_voice = sounddevice.rec( int ( 6 * fs ) , samplerate = fs, channels = 2 )
-sounddevice.wait()
-write("out.wav", fs, record_voice)
-print("Finished.....nPlease check your output file")
-
-
-openai.api_key = "API KEY"
-f = open("Pfad zu Server Projekt/out.wav", "rb")
-transcript = openai.Audio.transcribe("whisper-1", f)
-print(transcript['text'])
-frage = transcript['text']
-
-
-def frage_chatgpt(frage, model="gpt-3.5-turbo"):
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Auf deutsch bitte antworten:" + frage}
-        ],
-        max_tokens=50
-    )
-    return response.choices[0].message['content'].strip()
-
-
-
-# Host und Port
-HOST = 'localhost'
-PORT = 12345
-
-# Nachricht
-message = frage_chatgpt(frage)
-print(message.encode())
-
-# Socket erstellen und Verbindung herstellen
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect((HOST, PORT))
-
-# Nachricht senden
-client_socket.sendall(message.encode())
-
-# Verbindung schließen
-client_socket.close()
+def main (): 
+    host = "127.0.0.1"
+    port = 8888
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind((host, port))
+    server_socket.listen(1)
+    os.system("python3 ./Pepper_Server/main.py")
+    client_socket, client_address = server_socket.accept()
+    while True:
+        data = client_socket.recv(1024)
+        if not data:
+            break
+        ip_peper = "192.168.1.164"
+        tts = ALProxy("ALTextToSpeech", ip_peper, 9559)
+        tts.say(data)
+    client_socket.close()
