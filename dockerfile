@@ -7,8 +7,15 @@ WORKDIR /app
 # Copy the requirements.txt file into the container
 COPY requirements.txt .
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install any needed packages specified in requirements.txt except naoqi
+RUN pip install --no-cache-dir requests sounddevice scipy numpy
+
+# Download and install naoqi
+RUN apt-get update && \
+    apt-get install -y wget && \
+    wget <URL_TO_NAOQI_WHEEL> -O naoqi.whl && \
+    pip install naoqi.whl && \
+    rm naoqi.whl
 
 # Copy the current directory contents into the container at /app
 COPY . .
